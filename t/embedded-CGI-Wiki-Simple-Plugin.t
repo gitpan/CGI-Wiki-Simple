@@ -90,7 +90,7 @@ eval q{
     my ($module,@nodenames) = @_;
     CGI::Wiki::Simple::Plugin::register_nodes(module => $module, names => [@nodenames]);
   };
-  
+
 ;
 
   }

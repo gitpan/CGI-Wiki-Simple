@@ -56,9 +56,9 @@ eval q{
   use CGI::Wiki::Simple;
   use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'LastWeekChanges', days => 7 );
   # also
-  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'Recent20Changes', count => 20 );
+  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'Recent20Changes', last_n_changes => 20 );
   # also
-  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'RecentFileChanges', re => qr/^File:(.*)$/ );
+  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'RecentFileChanges', days => 14, re => qr/^File:(.*)$/ );
   # This will display all changed nodes that match ^File:
 
 ;

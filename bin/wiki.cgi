@@ -1,11 +1,12 @@
 #!perl -w
 use strict;
 
-use Findbin;
+use FindBin;
 my $base;
 BEGIN {
-  $base = $Findbin::bin || ".";
-  unshift @INC, "$base/../lib"
+  $base = $FindBin::Bin || ".";
+  unshift @INC, 'lib';
+  unshift @INC, "$base/../lib";
 };
 
 use CGI;
@@ -20,12 +21,13 @@ use CGI::Wiki::Simple::Plugin::Static( Welcome  => "There is an <a href='entranc
                                          Friend   => "You enter the deep dungeons of <a href='Moria'>Moria</a>.",
                                          );
 use CGI::Wiki::Simple::Plugin::NodeList( name => 'AllNodes' );
+use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'RecentChanges', days => 7 );
 use CGI::Wiki::Simple::Plugin::NodeList( name => 'AllCategories', re => '^Category:(.*)' );
 
 # Ugly Perl 5.4 hack to get all of this working with my ISP!
 Class::Delegation::INIT() if ($] < 5.006);
 
-CGI::Wiki::Simple::Setup::setup_if_needed( dbname => "$base/mywiki.db", dbtype => sqlite );
+CGI::Wiki::Simple::Setup::setup_if_needed( dbname => "$base/mywiki.db", dbtype => 'sqlite' );
 my $store = CGI::Wiki::Store::SQLite->new( dbname => "$base/mywiki.db" );
 
 # This is a quick check whether we can see the database

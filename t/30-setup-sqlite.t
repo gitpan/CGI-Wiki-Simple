@@ -10,15 +10,14 @@ BEGIN {
 };
 
 SKIP: {
-BEGIN {
-  eval {
+
+eval {
     require DBD::SQLite;
     require CGI::Wiki::Setup::SQLite;
     require CGI::Wiki::Store::SQLite;
-  };
-  skip "Need SQLite to test CGI interaction", 8
-    if $@;
 };
+skip "Need SQLite to test CGI interaction", 10
+  if $@;
 
 my $dbname = 'test_mywiki.db';
 
@@ -73,4 +72,5 @@ is(scalar @nodes, $initial_node_count, "Clear wipes all content");
 
 unlink $dbname
   or diag "Couldn't remove $dbname : $!";
+
 };

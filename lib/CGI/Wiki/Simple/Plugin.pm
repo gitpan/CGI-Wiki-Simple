@@ -9,7 +9,7 @@ use Digest::MD5 qw( md5_hex );
 
 use vars qw($VERSION);
 
-$VERSION = 0.05;
+$VERSION = 0.08;
 
 =head1 NAME
 
@@ -59,7 +59,7 @@ might convert all Plugin-subclasses to CGI::Wiki::Store subclasses or vice-versa
     my ($module,@nodenames) = @_;
     CGI::Wiki::Simple::Plugin::register_nodes(module => $module, names => [@nodenames]);
   };
-  
+
 =for example end
 
 =cut

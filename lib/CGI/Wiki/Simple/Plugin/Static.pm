@@ -2,7 +2,7 @@ package CGI::Wiki::Simple::Plugin::Static;
 use CGI::Wiki::Simple::Plugin();
 
 use vars qw($VERSION);
-$VERSION = 0.05;
+$VERSION = 0.08;
 
 my %static_content;
 

@@ -3,6 +3,8 @@ use strict;
 use Test::More tests => 11;
 use CGI::Wiki::Simple;
 
+$SIG{__WARN__} = sub {};
+
 {
   package CGI::Simple::Plugin::Test;
   use strict;

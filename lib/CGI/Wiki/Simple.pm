@@ -17,7 +17,7 @@ use Class::Delegation
 
 use vars qw( $VERSION %magic_node );
 
-$VERSION = 0.07;
+$VERSION = 0.08;
 
 =head1 NAME
 
@@ -108,7 +108,44 @@ lists HTML::Template as one of its prerequisites but also works without it.
 The C<setup> method is called by the CGI::Application framework
 when the application should initialize itself and load all necessary
 parameters. The wiki decides here what to do and loads all needed values
-from the configuration or database respectively.
+from the configuration or database respectively. These parameters are
+passed to the wiki via the C<PARAMS> parameter of CGI::Application, as
+C<setup> is not called directly. So the general use is like this :
+
+=for example begin
+
+  my $wiki = CGI::Wiki::Simple
+             ->new( PARAMS => {
+                                header => "<hr /> My custom header <hr />",
+                                store => $store,
+                              })->run;
+
+=for example end
+
+C<setup> takes a list of pairs as parameters, one mandatory and some optional :
+
+  store => $store
+
+The store entry must be the CGI::Wiki::Store that this wiki resides in.
+
+  header => "<hr />My own wiki<hr />"
+
+This is the header that gets printed before every node. The default is
+some simplicistic table to contain the wiki content. This is only used
+if you don't use templates, that is, if the wiki C<isa> CGI::Wiki::NoTemplates.
+
+  footer => "<hr />This node was presented by me<hr />"
+
+This is the footer that gets printed after every node. Also only used
+when no (other) templates are in use.
+
+  style => "http://www.example.com/style.css",
+
+This is the stylesheet to use with your page. Also, this is only used
+if you don't use templates. The default is no style sheet.
+
+Most of the parameters to the constructor of CGI::Wiki can also be passed
+here and will be passed on to the CGI::Wiki object.
 
 =cut
 
@@ -127,27 +164,33 @@ sub setup {
   #  or die "Couldn't create query save file : $!";
   #$q->save(*OUT);
   #close OUT;
-  my %config = ( store           => $self->param("store"),
+  my %default_config = (
+                 store           => $self->param("store"),
+  							 scriptname      => "wiki.cgi",
                  extended_links  => 1,
                  implicit_links  => 1,
                  node_prefix     => $q->script_name . '/display/',
                  script_name     => $q->script_name,
+                 style           => "",
                  header          => "<table width='100%'><tr><td align='left'><a href='".$q->script_name."/display/AllNodes'>AllNodes</a></td><td align='center'>CGI::Wiki::Simple Wiki</td>" .
-                                    "<td align='right'><form method=post action='".$q->script_name."'><input type='text' name='node' /><input type='hidden' name='action' value='display' /><input type='submit' value='go' /></form></td></tr></table>",
+                                      "<td align='right'><form method=post action='".$q->script_name."'><input type='text' name='node' /><input type='hidden' name='action' value='display' /><input type='submit' value='go' /></form></td></tr></table>",
                  footer          => "<center>
-                                     <form method=post action='".$q->script_name."'>
-                                     <a href='".$q->script_name."/display/index'>home</a>
-                                     | Powered by <a href='http://search.cpan.org/search?mode=module&query=CGI::Wiki'>CGI::Wiki</a>::Simple
-                                     | <input type='text' name='node' /><input type='hidden' name='action' value='display' /><input type='submit' value='go' /></form>
-                                     </center>",
+                                       <form method=post action='".$q->script_name."'>
+                                       <a href='".$q->script_name."/display/index'>home</a>
+                                       | Powered by <a href='http://search.cpan.org/search?mode=module&query=CGI::Wiki'>CGI::Wiki</a>::Simple
+                                       | <input type='text' name='node' /><input type='hidden' name='action' value='display' /><input type='submit' value='go' /></form>
+                                       </center>",
   );
 
-  $self->param("cgi_wiki_simple_header", delete $config{header} || "");
-  $self->param("cgi_wiki_simple_footer", delete $config{footer} || "");
-  $self->param("cgi_wiki_simple_style", delete $config{style} || "");
-  $self->param("cgi_wiki_simple_scriptname", delete $config{scriptname} || "wiki.cgi");
+  $args{$_} = defined $args{$_} ? $args{$_} : $default_config{$_}
+    for (keys %default_config);
 
-  $self->param(wiki        => CGI::Wiki->new(%config));
+  $self->param("cgi_wiki_simple_header", delete $args{header} || "");
+  $self->param("cgi_wiki_simple_footer", delete $args{footer} || "");
+  $self->param("cgi_wiki_simple_style", delete $args{style} || "");
+  $self->param("cgi_wiki_simple_scriptname", delete $args{scriptname} || "wiki.cgi");
+
+  $self->param(wiki        => CGI::Wiki->new(%args));
   $self->param(script_name => $q->script_name);
 
   # Maybe later add the connection to the database here...
@@ -184,7 +227,7 @@ sub load_actions {
 sub render {
   my ($self,$templatename,$actions,@params) = @_;
   my $template = $self->load_tmpl($templatename);
-  warn join "+",@$actions;
+  #warn join "+",@$actions;
   $self->load_actions($template, map { $_ => 1 } @$actions );
   $template->param( $_ => $self->param( $_ )) for @params;
   $template->output;

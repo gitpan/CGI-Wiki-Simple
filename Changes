@@ -1,5 +1,16 @@
 Revision history for Perl extension CGI::Wiki::Simple.
 
+0.08 20030401
+  - Second cleanup release :
+  - Fixed unquoted prerequisites in Makefile.PL (Perl 5.8.0 complains)
+  - Made header/footer/stylesheet configurable if no templates are used
+  - RecentChanges plugin now actually works
+  - The scripts in bin/ are now checked whether they actually compile
+  - Massive thanks to Kate L. Pugh and Podmaster who tested the previous
+    release and reported all those nasty errors that either slipped
+    my test setup or I didn't have tests for, or were simply neglected
+    by me.
+
 0.07 20030331
   - Cleanup release :
   - fixed README

@@ -3,7 +3,7 @@ use CGI::Wiki::Simple::Plugin();
 use HTML::Entities;
 
 use vars qw($VERSION);
-$VERSION = 0.05;
+$VERSION = 0.08;
 
 =head1 NAME
 
@@ -22,37 +22,44 @@ the store properties for the plugins as well.
   use CGI::Wiki::Simple;
   use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'LastWeekChanges', days => 7 );
   # also
-  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'Recent20Changes', count => 20 );
+  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'Recent20Changes', last_n_changes => 20 );
   # also
-  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'RecentFileChanges', re => qr/^File:(.*)$/ );
+  use CGI::Wiki::Simple::Plugin::RecentChanges( name => 'RecentFileChanges', days => 14, re => qr/^File:(.*)$/ );
   # This will display all changed nodes that match ^File:
 
 =for example end
 
 =cut
 
-use vars qw(%re);
+use vars qw(%args);
 
 sub import {
-    my ($module,%args) = @_;
-    my $node = $args{name};
-    $re{$node} = $args{re} || '^(.*)$';
+    my ($module,%node_args) = @_;
+    my $node = delete $node_args{name};
+    $args{$node} = { %node_args };
+    $args{$node}->{re} ||= '^(.*)$';
     CGI::Wiki::Simple::Plugin::register_nodes(module => $module, name => $node);
 };
 
 sub retrieve_node {
-  my (%args) = @_;
+  my (%node_args) = @_;
 
-  my $node = $args{name};
-  my $re = $re{$node};
-  my %nodes = {};
+  my $node = $node_args{name};
+  my %params = %{$args{$node}};
+
+  my $re = delete $params{re} || '^(.*)$';
+  my %nodes = map {
+                    $_->{name} =~ /$re/ ?
+                      ($_->{name} => [ $1, $_->{last_modified} ])
+                    : ()
+                  } $node_args{wiki}->list_recent_changes( %params );
 
   return (
-       "<ul>" .
-       join ("\n", map { "<li><a href='?node=$nodes{$_}'>".HTML::Entities::encode_entities($_)."</a></li>" }
-                   sort { uc($a) cmp uc($b) }
+       "<table class='RecentChanges'>" .
+       join ("\n", map { "<tr><td><a href='?node=$_'>".HTML::Entities::encode_entities($nodes{$_}->[0])."</a></td><td>".$nodes{$_}->[1]."</td></tr>" }
+                   sort { $nodes{$b}->[1] cmp $nodes{$a}->[1] }
                    keys %nodes)
-     . "</ul>",0,"");
+     . "</table>",0,"");
 };
 
 1;

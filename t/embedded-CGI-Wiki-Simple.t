@@ -151,3 +151,36 @@ SKIP: {
     undef $main::_STDERR_;
 
 };
+SKIP: {
+    # A header testing whether we find all prerequisites :
+    
+    # The original POD test
+        undef $main::_STDOUT_;
+    undef $main::_STDERR_;
+eval q{
+  my $example = sub {
+    local $^W = 0;
+
+#line 116 lib/CGI/Wiki/Simple.pm
+
+  my $wiki = CGI::Wiki::Simple
+             ->new( PARAMS => {
+                                header => "<hr /> My custom header <hr />",
+                                store => $store,
+                              })->run;
+
+;
+
+  }
+};
+is($@, '', "example from line 116");
+
+};
+SKIP: {
+    # A header testing whether we find all prerequisites :
+    
+    # The original POD test
+        undef $main::_STDOUT_;
+    undef $main::_STDERR_;
+
+};

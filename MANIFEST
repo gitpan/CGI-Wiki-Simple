@@ -16,11 +16,13 @@ t/00-Class-Delegation-double-delegation.t
 t/00-prerequisites.t
 t/01-api.t
 t/02-fallback.t
+t/03-params.t
 t/09-plugin.t
 t/10-plugin-static.t
 t/20-plugin-nodelist.t
 t/30-setup-sqlite.t
 t/50-store-retrieve-page.t
+t/98-bin.t
 t/99-Pod.t
 t/embedded-CGI-Wiki-Simple-NoTemplates.t
 t/embedded-CGI-Wiki-Simple-Plugin-NodeList.t

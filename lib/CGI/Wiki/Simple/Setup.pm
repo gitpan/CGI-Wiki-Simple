@@ -9,7 +9,7 @@ use Digest::MD5 qw( md5_hex );
 
 use vars qw($VERSION @NODES);
 
-$VERSION = 0.07;
+$VERSION = 0.08;
 
 =head1 NAME
 
@@ -45,6 +45,11 @@ sub get_sqlite_store {
   # get the wiki store :
   my $store = CGI::Wiki::Store::SQLite->new( dbname => $args{dbname} );
   warn "Couldn't get store for $args{dbname}" unless $store;
+
+  if ($args{check}) {
+    $store->retrieve_node("index");
+  };
+
   return $store;
 };
 
@@ -87,7 +92,7 @@ sub setup {
   };
 
   commit_content( %args, wiki => $wiki, nodes => [@NODES], );
-  
+
   undef $wiki;
   $store->dbh->disconnect;
 };
@@ -136,7 +141,7 @@ Title: index
 This is the main page of your new wiki. It was preset
 by the automatic content setup.
 
-If your wiki will be accessible to the general public, you might want 
+If your wiki will be accessible to the general public, you might want
 to make this node read only by loading the [CGI::Wiki::Simple::Plugin::Static]
 plugin for this node :
 

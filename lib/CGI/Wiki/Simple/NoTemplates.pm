@@ -3,7 +3,7 @@ use strict;
 use base 'CGI::Wiki::Simple';
 
 use vars qw($VERSION);
-$VERSION = 0.05;
+$VERSION = 0.08;
 
 =head1 NAME
 

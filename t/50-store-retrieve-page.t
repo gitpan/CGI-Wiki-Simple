@@ -13,6 +13,7 @@ use Test::HTML::Content;
 use vars qw( $cgi $wiki );
 
 $^W = undef;
+BEGIN { $SIG{__WARN__} = sub {};};
 
 sub get_cgi_response {
   my $result = $wiki->run;
@@ -24,20 +25,16 @@ sub get_cgi_response {
 
 SKIP: {
 
-  BEGIN {
-    eval { require HTTP::Response; };
-    skip "Need HTTP::Response to test CGI interaction", 5
+  eval { require HTTP::Response; };
+  skip "Need HTTP::Response to test CGI interaction", 21
       if $@;
-  };
-  BEGIN {
-    eval { 
+  eval {
       require DBD::SQLite;
       require CGI::Wiki::Setup::SQLite;
       require CGI::Wiki::Store::SQLite;
-    };
-    skip "Need SQLite to test CGI interaction", 5
-      if $@;
   };
+  skip "Need SQLite to test CGI interaction", 21
+    if $@;
 
   BEGIN{ use_ok( "CGI::Wiki::Simple" ) };
   *CGI::Wiki::Simple::cgiapp_get_query = sub { $cgi };
@@ -139,6 +136,11 @@ SKIP: {
   #   render with empty action list should return three no_link/no_tags
   #   render with combined action list should return the correct links/tags
   #   render with empty action list should return three no_link/no_tags
+  
+  undef $wiki;
+  $store->dbh->disconnect;
+  unlink $dbfile
+    or diag "Couldn't remove $dbfile : $!";
 }
 
 __DATA__
