@@ -1,0 +1,55 @@
+NAME
+    CGI::Wiki::Simple -
+
+SYNOPSIS
+      use CGI::Wiki::Simple;
+      blah blah blah
+
+DESCRIPTION
+    Stub documentation for this module was created by ExtUtils::ModuleMaker.
+    It looks like the author of the extension was negligent enough to leave
+    the stub unedited.
+
+    Blah blah blah.
+
+USAGE
+BUGS
+SUPPORT
+AUTHOR
+            A. U. Thor
+            a.u.thor@a.galaxy.far.far.away
+            http://a.galaxy.far.far.away/modules
+
+COPYRIGHT
+    Copyright (c) 2003 A. U. Thor. All rights reserved. This program is free
+    software; you can redistribute it and/or modify it under the same terms
+    as Perl itself.
+
+    The full text of the license can be found in the LICENSE file included
+    with this module.
+
+SEE ALSO
+    perl(1).
+
+PUBLIC METHODS
+    Each public function/method is described here. These are how you should
+    interact with this module.
+
+PRIVATE METHODS
+    Each private function/method is described here. These methods and
+    functions are considered private and are intended for internal use by
+    this module. They are not considered part of the public interface and
+    are described here for documentation purposes only.
+
+  sample_function
+
+     Usage     : How to use this function/method
+     Purpose   : What it does
+     Returns   : What it returns
+     Argument  : What it wants to know
+     Throws    : Exceptions and other anomolies
+     Comments  : This is a sample subroutine header.
+               : It is polite to include more pod and fewer comments.
+
+    See Also :
+
