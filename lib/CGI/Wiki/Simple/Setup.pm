@@ -9,7 +9,7 @@ use Digest::MD5 qw( md5_hex );
 
 use vars qw($VERSION @NODES);
 
-$VERSION = 0.09;
+$VERSION = 0.10;
 
 =head1 NAME
 
@@ -23,49 +23,62 @@ This is a simple utility module that given a database sets up a complete wiki wi
 
 =for example begin
 
-  setup( dbname => "mywiki.db" );
+  setup( dbtype => 'sqlite', dbname => "mywiki.db" );
   # This sets up a SQLite wiki within the file mywiki.db
 
 =for example end
 
 =cut
 
-sub get_sqlite_store {
-  my %args = @_;
-
-  require CGI::Wiki::Store::SQLite;
-  require CGI::Wiki::Setup::SQLite;
-
-  if ($args{setup}) {
-    CGI::Wiki::Setup::SQLite::cleardb($args{dbname})
-      if $args{clear};
-    CGI::Wiki::Setup::SQLite::setup($args{dbname})
-  };
-
-  # get the wiki store :
-  my $store = CGI::Wiki::Store::SQLite->new( dbname => $args{dbname} );
-  warn "Couldn't get store for $args{dbname}" unless $store;
-
-  if ($args{check}) {
-    $store->retrieve_node("index");
-  };
-
-  return $store;
-};
+my %stores = (
+  sqlite => 'SQLite',
+  mysql  => 'MySQL',
+  pg     => 'Pg',
+);
 
 sub get_store {
   my %args = @_;
 
-  if ($args{dbtype} =~ /^sqlite$/i) {
-    get_sqlite_store(%args);
+  my @setup_args;
+  my $dbtype;
+
+  push @setup_args, $args{dbname};
+  for (qw(dbuser dbpass)) {
+    push @setup_args, $args{$_}
+      if exists $args{$_};
   };
+
+  $dbtype = delete $args{dbtype};
+
+  croak "Unknown database type $dbtype"
+    unless exists $stores{lc($dbtype)};
+  $dbtype = $stores{lc($dbtype)};
+
+  eval "use CGI::Wiki::Store::$dbtype; use CGI::Wiki::Setup::$dbtype";
+
+  if ($args{setup}) {
+    no strict 'refs';
+    &{"CGI::Wiki::Setup::${dbtype}::cleardb"}(@setup_args)
+      if $args{clear};
+    &{"CGI::Wiki::Setup::${dbtype}::setup"}(@setup_args);
+  };
+
+  # get the wiki store :
+  my $store = "CGI::Wiki::Store::$dbtype"->new( %args );
+  warn "Couldn't get store for $args{dbname}" unless $store;
+
+  $store->retrieve_node("index")
+    if ($args{check});
+
+  return $store;
 };
 
 sub setup_if_needed {
   my %args = @_;
 
-  eval { get_store( %args, check => 1 ); };
-  setup(%args) if $@;
+  my $store;
+  eval { $store = get_store( %args, check => 1 ); };
+  setup(%args) if $@ or ! $store;
 };
 
 sub setup {
@@ -74,32 +87,38 @@ sub setup {
   croak "No dbtype given"
     unless $args{dbtype};
 
-  croak "Unknown database type $args{dbtype}"
-    unless $args{dbtype} =~ /^sqlite$/i; # add mysql !
-
   my $store = get_store( %args, setup => 1 );
-  print "Loading content\n";
-  my $wiki = CGI::Wiki->new(
-             store  => $store,
-             search => undef );
+  unless ($args{nocontent}) {
+    print "Loading content\n"
+      unless $args{silent};
 
-  unless (@NODES) {
-    @NODES = map {
-      /^Title:\s+(.*?)\r?\n(.*)/ms
-      ? { title => $1, content => $2 }
-      : ()
-    } do { undef $/; split /__NODE__/, <DATA> };
+    my $wiki = CGI::Wiki->new(
+               store  => $store,
+               search => undef );
+
+    unless (@NODES) {
+      @NODES = map {
+        /^Title:\s+(.*?)\r?\n(.*)/ms
+        ? { title => $1, content => $2 }
+        : ()
+      } do { undef $/; split /__NODE__/, <DATA> };
+    };
+
+    commit_content( %args, wiki => $wiki, nodes => [@NODES], );
+
+    undef $wiki;
   };
 
-  commit_content( %args, wiki => $wiki, nodes => [@NODES], );
-
-  undef $wiki;
   $store->dbh->disconnect;
 };
 
 sub commit_content {
   my %args = @_;
   my $wiki = $args{wiki};
+
+  croak "No wiki passed in the 'wiki' parameter"
+    unless $wiki;
+
   my @nodes = @{$args{nodes}};
   foreach my $node (@nodes) {
     my $title = $node->{title};
@@ -111,13 +130,13 @@ sub commit_content {
       my $cksum = $old_node{checksum};
       my $written = $wiki->write_node($title, $content, $cksum);
       if ($written) {
-        #print "(Re)initialized node '$title'\n";
+        print "(Re)initialized node '$title'\n"
+          unless $args{silent};
       } else {
         warn "Node '$title' not written\n";
       };
     } else {
       warn "Node '$title' already contains data. Not overwritten.";
-      #warn $old_node{content};
     };
   };
 };
@@ -195,5 +214,5 @@ CGI::Wiki::Simple was written by Max Maischein (cgi-wiki-simple@corion.net). Ple
 through the CPAN RT at http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-Wiki-Simple .
 
 CGI::Wiki::Simple again is based on CGI::Wiki (at http://search.cpan.org/search?mode=module&query=CGI::Wiki )
-by Kate Plugh.
+by Kate Pugh.
 

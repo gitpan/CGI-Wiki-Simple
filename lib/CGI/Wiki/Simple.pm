@@ -17,7 +17,7 @@ use Class::Delegation
 
 use vars qw( $VERSION %magic_node );
 
-$VERSION = 0.09;
+$VERSION = '0.10';
 
 =head1 NAME
 
@@ -185,7 +185,7 @@ sub setup {
   my %args;
   $args{$_} = defined $self->param($_) ? $self->param($_) : $default_config{$_}
     for (keys %default_config);
-    
+
   $self->param( $_ => $args{$_})
     for qw( script_name );
 
@@ -383,7 +383,7 @@ sub cgiapp_prerun {
 
 =head1 ACKNOWLEDGEMENTS
 
-Many thanks must go to Kate Plugh, for writing L<CGI::Wiki> and for testing and proofreading this module.
+Many thanks must go to Kate Pugh, for writing L<CGI::Wiki> and for testing and proofreading this module.
 
 =head1 AUTHOR
 

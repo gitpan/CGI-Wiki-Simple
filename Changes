@@ -1,5 +1,14 @@
 Revision history for Perl extension CGI::Wiki::Simple.
 
+0.10 20030403
+  - Setup is now implemented for all supported databases
+  - Setup is now testing for all configured test databases
+
+0.09 20030402
+  - Missed updating the changes file
+  - More tests
+  - Automagic setup routine (for SQLite)
+
 0.08 20030401
   - Second cleanup release :
   - Fixed unquoted prerequisites in Makefile.PL (Perl 5.8.0 complains)

@@ -11,7 +11,7 @@ WriteMakefile(
                        'Test::MockObject' => 0,
                        'Test::Without::Module' => 0.01,
                        'Test::HTML::Content' => 0.03,
-                       'CGI::Wiki' => 0.14,
+                       'CGI::Wiki' => 0.26,
                        'Class::Delegation' => 1.06,
                        'HTML::Entities' => 0,
                        'CGI::Application' => 3.0,

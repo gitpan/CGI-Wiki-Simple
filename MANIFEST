@@ -21,7 +21,7 @@ t/04-inside-link.t
 t/09-plugin.t
 t/10-plugin-static.t
 t/20-plugin-nodelist.t
-t/30-setup-sqlite.t
+t/30-setup.t
 t/50-store-retrieve-page.t
 t/98-bin.t
 t/99-Pod.t
