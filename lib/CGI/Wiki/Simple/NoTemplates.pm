@@ -3,7 +3,7 @@ use strict;
 use base 'CGI::Wiki::Simple';
 
 use vars qw($VERSION);
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 =head1 NAME
 
@@ -45,9 +45,10 @@ sub make_edit_form {
   my ($self,$raw_content,%actions) = @_;
 
   my ($url_title) = $self->param("url_node_title");
-  my $prefix = $self->query->script_name;
+  #my $prefix = $self->query->script_name;
 
-  return "<form method='post' enctype='multipart/form-data' action='$prefix/commit/$url_title'>"
+  return "<form method='post' enctype='multipart/form-data' action='".
+            $self->node_url(node => $self->param("node_title"), mode => 'commit')."'>"
        . "<textarea name='content' cols='60' rows='20'>"
        . HTML::Entities::encode_entities($raw_content)
        . "</textarea><br />"
@@ -85,7 +86,8 @@ sub make_checksum {
 
 sub actions {
   my ($self,%args) = @_;
-  my $node = $self->param("url_node_title");
+  #my $node = $self->param("url_node_title");
+  my $node = $self->param("node_title");
   my $checksum = $self->make_checksum();
 
   my $prefix = $self->query->script_name;
@@ -94,12 +96,14 @@ sub actions {
 
   # First, make the "display" link
   if (delete $args{display}) {
-    push @result, "<a href='$prefix/display/$node'>display</a>";
+    push @result, $self->inside_link( node => $node, mode => 'display', title => 'display' );
+    #push @result, "<a href='$prefix/display/$node'>display</a>";
   };
 
   # and then the "preview" link
   if (delete $args{preview}) {
-    push @result, "<a href='$prefix/preview/$node'>edit</a>";
+    push @result, $self->inside_link( node => $node, mode => 'preview', title => 'preview' );
+    #push @result, "<a href='$prefix/preview/$node'>edit</a>";
   };
 
   # and then the "save" link

@@ -17,7 +17,7 @@ use Class::Delegation
 
 use vars qw( $VERSION %magic_node );
 
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 =head1 NAME
 
@@ -150,7 +150,7 @@ here and will be passed on to the CGI::Wiki object.
 =cut
 
 sub setup {
-  my ($self,%args) = @_;
+  my ($self) = @_;
   $self->run_modes(
     preview  => 'render_editform',
     display  => 'render_display',
@@ -164,13 +164,13 @@ sub setup {
   #  or die "Couldn't create query save file : $!";
   #$q->save(*OUT);
   #close OUT;
+
   my %default_config = (
                  store           => $self->param("store"),
-  							 scriptname      => "wiki.cgi",
+  							 script_name     => $q->script_name,
                  extended_links  => 1,
                  implicit_links  => 1,
                  node_prefix     => $q->script_name . '/display/',
-                 script_name     => $q->script_name,
                  style           => "",
                  header          => "<table width='100%'><tr><td align='left'><a href='".$q->script_name."/display/AllNodes'>AllNodes</a></td><td align='center'>CGI::Wiki::Simple Wiki</td>" .
                                       "<td align='right'><form method=post action='".$q->script_name."'><input type='text' name='node' /><input type='hidden' name='action' value='display' /><input type='submit' value='go' /></form></td></tr></table>",
@@ -182,23 +182,76 @@ sub setup {
                                        </center>",
   );
 
-  $args{$_} = defined $args{$_} ? $args{$_} : $default_config{$_}
+  my %args;
+  $args{$_} = defined $self->param($_) ? $self->param($_) : $default_config{$_}
     for (keys %default_config);
+    
+  $self->param( $_ => $args{$_})
+    for qw( script_name );
 
-  $self->param("cgi_wiki_simple_header", delete $args{header} || "");
-  $self->param("cgi_wiki_simple_footer", delete $args{footer} || "");
-  $self->param("cgi_wiki_simple_style", delete $args{style} || "");
-  $self->param("cgi_wiki_simple_scriptname", delete $args{scriptname} || "wiki.cgi");
+  for (qw( header footer style )) {
+    $self->param("cgi_wiki_simple_$_", $self->param($_) || $args{$_});
+  };
 
-  $self->param(wiki        => CGI::Wiki->new(%args));
-  $self->param(script_name => $q->script_name);
+  $self->param(wiki => CGI::Wiki->new(%args));
 
   # Maybe later add the connection to the database here...
 };
 
+=item B<teardown>
+
+The C<teardown> sub is called by CGI::Application when the
+program ends. Currently, it does nothing in CGI::Wiki::Simple.
+
+=cut
+
 sub teardown {
   my ($self) = @_;
   # Maybe later add the database disconnect here ...
+};
+
+=item B<node_link %ARGS>
+
+C<node_link> creates a link to a node suitable to use as the C<href> attribute.
+The arguments are :
+
+  node => 'Node title'
+  mode => 'display' # or 'edit' or 'commit'
+
+The default mode is C<display>.
+
+=cut
+
+sub node_url {
+  my ($self,%args) = @_;
+  $args{mode} = 'display'
+    unless exists $args{mode};
+  return $self->param('script_name') . "/$args{mode}/" . uri_escape($args{node});
+};
+
+=item B<inside_link %ARGS>
+
+C<inside_link> is a convenience function to create a link within the Wiki.
+The parameters are :
+
+  title  => 'Link title'
+  target => 'Node name'
+  node   => 'Node name' # synonymous to target
+  mode   => 'display' # or 'edit' or 'commit'
+
+If C<title> is missing, C<target> is used as a default, if C<mode> is missing,
+C<display> is assumed. Everything is escaped in the right way. This method
+is mostly intended for plugins. A possible API change might be a move of
+this function into L<CGI::Wiki::Simple::Plugin>.
+
+=cut
+
+sub inside_link {
+  my ($self,%args) = @_;
+  $args{node} ||= $args{target};
+  $args{title} ||= $args{node};
+
+  "<a href='" . $self->node_url(%args) . "'>" . HTML::Entities::encode_entities($args{title}) . "</a>";
 };
 
 =item B<wiki>
@@ -269,7 +322,7 @@ sub render_commit {
 
   if ($written || not defined $cksum) {
     $self->header_type("redirect");
-    $self->header_props( -url => $self->query->script_name . "/display/$node");
+    $self->header_props( -url => $self->node_url( node => $node, mode => 'display' ));
   } else {
     $self->param( submitted_content => $submitted_content );
     return $self->render_conflict();

@@ -136,7 +136,7 @@ SKIP: {
   #   render with empty action list should return three no_link/no_tags
   #   render with combined action list should return the correct links/tags
   #   render with empty action list should return three no_link/no_tags
-  
+
   undef $wiki;
   $store->dbh->disconnect;
   unlink $dbfile

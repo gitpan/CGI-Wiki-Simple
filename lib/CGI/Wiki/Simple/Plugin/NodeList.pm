@@ -3,7 +3,7 @@ use CGI::Wiki::Simple::Plugin();
 use HTML::Entities;
 
 use vars qw($VERSION);
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 =head1 NAME
 
@@ -41,12 +41,12 @@ sub retrieve_node {
 
   my $node = $args{name};
   my $re = $re{$node};
-  my %nodes = map { /$re/ ? ($1 => $_) : () } ($args{wiki}->list_all_nodes, keys %CGI::Wiki::Simple::magic_node);
+  my %nodes = map { /$re/ ? ($_ => $1) : () } ($args{wiki}->list_all_nodes, keys %CGI::Wiki::Simple::magic_node);
 
   return (
        "<ul>" .
-       join ("\n", map { "<li><a href='../display/$nodes{$_}'>".HTML::Entities::encode_entities($_)."</a></li>" }
-                   sort { uc($a) cmp uc($b) }
+       join ("\n", map { "<li>" . $args{wiki}->inside_link( node => $_, title => $nodes{$_} ) . "</li>" }
+                   sort { uc($nodes{$a}) cmp uc($nodes{$b}) }
                    keys %nodes)
      . "</ul>",0,"");
 };

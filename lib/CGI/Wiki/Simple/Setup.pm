@@ -9,7 +9,7 @@ use Digest::MD5 qw( md5_hex );
 
 use vars qw($VERSION @NODES);
 
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 =head1 NAME
 

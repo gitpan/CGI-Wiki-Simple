@@ -17,6 +17,7 @@ t/00-prerequisites.t
 t/01-api.t
 t/02-fallback.t
 t/03-params.t
+t/04-inside-link.t
 t/09-plugin.t
 t/10-plugin-static.t
 t/20-plugin-nodelist.t
