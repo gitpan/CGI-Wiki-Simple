@@ -7,6 +7,7 @@ use CGI::Wiki::TestConfig;
 my @tests;
 BEGIN {
   @tests = grep {     defined $CGI::Wiki::TestConfig::config{$_}
+                  and ref $CGI::Wiki::TestConfig::config{$_} eq "HASH"
                   and defined $CGI::Wiki::TestConfig::config{$_}->{dbname}
                 } sort keys %CGI::Wiki::TestConfig::config;
 };

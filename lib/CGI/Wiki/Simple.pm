@@ -17,7 +17,7 @@ use Class::Delegation
 
 use vars qw( $VERSION %magic_node );
 
-$VERSION = '0.11';
+$VERSION = '0.12';
 
 =head1 NAME
 
@@ -156,7 +156,7 @@ sub setup {
     display  => 'render_display',
     commit   => 'render_commit',
   );
-  $self->mode_param("action");
+  $self->mode_param( \&decode_runmode );
   $self->start_mode("display");
 
   my $q = $self->query;
@@ -329,25 +329,36 @@ sub render_commit {
   }
 };
 
-=item cgiapp_prerun
+=item B<decode_runmode>
 
-Loads some values for the subsequent rendering.
+C<decode_runmode> decides upon the url what to do. It also
+initializes the following CGI::Application params :
+
+  html_node_title
+  url_node_title
+  node_title
+
+  version
+  checksum
+  content
+  raw
 
 =cut
 
-sub cgiapp_prerun {
+sub decode_runmode {
   my ($self) = @_;
   my $q = $self->query;
   my $node_title = $q->param("node");
   my $action = $q->param("action");
 
   # Magic runmode decoding :
-  my $runmodes = join "|", map {qr/\Q$_\E/ } $self->run_modes;
+  my $runmodes = join "|", map { quotemeta } $self->run_modes;
   if ($q->path_info =~ m!^/($runmodes)/(.*)!) {
-    warn "Changing action to $1 (".$q->path_info.")";
     $action = $1;
     $node_title ||= $2;
+    $q->param("action","");
   };
+  $action ||= 'display';
   $node_title ||= "index";
   $node_title = uri_unescape($node_title);
 
@@ -372,7 +383,8 @@ sub cgiapp_prerun {
 
   $action = "display"
     unless defined $raw;
-  $self->prerun_mode($action);
+
+  $action;
 };
 
 =back

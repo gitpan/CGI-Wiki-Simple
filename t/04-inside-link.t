@@ -22,10 +22,12 @@ BEGIN {
   @error_tests = ();
 };
 
-use Test::More tests => 2+scalar @good_tests + scalar @error_tests;
+use Test::More tests => 2+scalar @good_tests*2 + scalar @error_tests*2;
 
 BEGIN{ use_ok('CGI::Wiki::Simple') };
-#$SIG{__WARN__} = sub {};
+
+my @warnings;
+BEGIN { $SIG{__WARN__} = sub { push @warnings, @_ };};
 
 my $wiki = CGI::Wiki::Simple->new(
       PARAMS => { store => {}, script_name => '/wiki' } # dummy store
@@ -35,7 +37,11 @@ isa_ok($wiki, 'CGI::Wiki::Simple', "The created wiki");
 for (@good_tests) {
   my ($args,$result,$name) = @$_;
   is( $wiki->inside_link(@$args),$result,$name );
+  is_deeply(\@warnings,[],"No warnings raised");
+  @warnings = ();
 };
 
 for (@error_tests) {
+  is_deeply(\@warnings,[],"No warnings raised");
+  @warnings = ();
 };

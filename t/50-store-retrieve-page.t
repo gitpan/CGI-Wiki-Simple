@@ -11,21 +11,25 @@ use Test::Without::Module qw( HTML::Template );
 use Test::HTML::Content;
 
 BEGIN {
-  use Test::More tests => 2+(21 * $CGI::Wiki::TestConfig::Utilities::num_stores);
+  use Test::More tests => 2+(25 * $CGI::Wiki::TestConfig::Utilities::num_stores);
 
   use_ok( "CGI::Wiki::Simple" );
   use_ok( "CGI::Wiki::Simple::Setup" );
 };
 
 use vars qw( $cgi $store %stores );
+
 %stores = CGI::Wiki::TestConfig::Utilities->stores;
 
-BEGIN { $SIG{__WARN__} = sub {};};
+my @warnings;
+BEGIN { $SIG{__WARN__} = sub { push @warnings, @_ };};
 
 sub get_cgi_response {
   my $wiki = CGI::Wiki::Simple->new( TMPL_PATH => 'templates', PARAMS => { store => $store, search => undef } );
   isa_ok( $wiki, "CGI::Wiki::Simple", "The wiki" );
   my $result = $wiki->run;
+  is_deeply(\@warnings,[],"No warnings raised during run");
+  @warnings = ();
   my ($headers,$body) = split( /\015\012\015\012/ms, $result, 2);
   $headers = HTTP::Headers->new( map { /^(.*?): (.*)$/ ? ($1,$2) : () } split( /\r\n/, $headers ));
   my $response = HTTP::Response->new( 200, 'Testing', $headers, $body );
@@ -47,9 +51,9 @@ SKIP: {
   while (($storename,$store) = each %stores) {
     SKIP: {
       eval { require HTTP::Response; };
-      skip "Need HTTP::Response to test CGI interaction", 21
+      skip "Need HTTP::Response to test CGI interaction", 25
         if $@;
-      skip "Store $storename not configured for testing", 21
+      skip "Store $storename not configured for testing", 25
         unless $store;
 
       seek DATA, $dataoffset, 0
@@ -71,7 +75,7 @@ SKIP: {
       # And recreate a store :
       $store = CGI::Wiki::Simple::Setup::get_store(%dbargs);
       my $nodes = $store->dbh->selectall_arrayref("select * from content");
-      is_deeply($nodes,[],"Cleaned database");
+      is_deeply($nodes,[],"Clean database");
 
       # Set up the environment as to fake a real CGI environment :
       $cgi = CGI->new('');
