@@ -3,7 +3,7 @@ use CGI::Wiki::Simple::Plugin();
 use HTML::Entities;
 
 use vars qw($VERSION);
-$VERSION = 0.09;
+$VERSION = 0.11;
 
 =head1 NAME
 
@@ -57,7 +57,7 @@ sub retrieve_node {
   return (
        "<table class='RecentChanges'>" .
        join ("\n", map { "<tr><td>" .
-                         $args{wiki}->inside_link( node => $_, title => $nodes{$_}->[0] ) .
+                         $node_args{wiki}->inside_link( node => $_, title => $nodes{$_}->[0] ) .
                          "</td><td>".$nodes{$_}->[1]."</td></tr>" }
                    sort { $nodes{$b}->[1] cmp $nodes{$a}->[1] }
                    keys %nodes)

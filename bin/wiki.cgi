@@ -27,13 +27,17 @@ use CGI::Wiki::Simple::Plugin::NodeList( name => 'AllCategories', re => '^Catego
 # Ugly Perl 5.4 hack to get all of this working with my ISP!
 Class::Delegation::INIT() if ($] < 5.006);
 
-CGI::Wiki::Simple::Setup::setup_if_needed( dbname => "$base/mywiki.db", dbtype => 'sqlite' );
-my $store = CGI::Wiki::Store::SQLite->new( dbname => "$base/mywiki.db" );
+my %dbargs = (
+  dbtype => 'sqlite',
+  dbname => "base/mywiki.db",
+);
+
+CGI::Wiki::Simple::Setup::setup_if_needed( %dbargs );
+my $store = CGI::Wiki::Store::SQLite->new( %dbargs );
 
 # This is a quick check whether we can see the database
 #$store->retrieve_node("index");
 
-my $search = undef;
 my $wiki = CGI::Wiki::Simple->new( TMPL_PATH => "$base/../templates",
                                    PARAMS => {
                                         store => $store,

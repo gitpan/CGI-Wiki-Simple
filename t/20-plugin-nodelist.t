@@ -16,9 +16,9 @@ BEGIN {
     $args{mode} ||= 'display';
     "/wiki/$args{mode}/" . uri_escape($args{node});
   } );
-  $wiki->mock( inside_link => sub { 
-    my ($self,%args) = @_;   
-    "<a href='" . $self->node_url(%args) . "'>" . HTML::Entities::encode_entities($args{title}) . "</a>"; 
+  $wiki->mock( inside_link => sub {
+    my ($self,%args) = @_;
+    "<a href='" . $self->node_url(%args) . "'>" . HTML::Entities::encode_entities($args{title}) . "</a>";
   } );
 };
 

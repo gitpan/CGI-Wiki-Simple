@@ -1,6 +1,13 @@
 Revision history for Perl extension CGI::Wiki::Simple.
 
-0.10 20030403
+0.11 20030404
+  - Fixed a nasty bug in the RecentChanges plugin
+  - added two wiki maintenance tools :
+      - dump-wiki.pl - creates nodeballs
+      - simple-user-setup.pl - can now setup any database and can create nodeballs
+  - added capability to load nodeballs into the wiki
+
+0.10 20030404
   - Setup is now implemented for all supported databases
   - Setup is now testing for all configured test databases
 

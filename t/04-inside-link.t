@@ -18,7 +18,7 @@ BEGIN {
     [[ target => 'foo::bar', title => '<>', mode => 'test' ], "<a href='/wiki/test/foo%3A%3Abar'>&lt;&gt;</a>", 'URL/HTML encoding' ],
     [[ target => 'foo::bar', title => 'foo::bar', mode => 'test' ], "<a href='/wiki/test/foo%3A%3Abar'>foo::bar</a>", 'URL encoding' ],
   );
-  
+
   @error_tests = ();
 };
 

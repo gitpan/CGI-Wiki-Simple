@@ -7,7 +7,7 @@ BEGIN {
   plan( tests => 9 );
   use_ok('CGI::Wiki::Simple');
   use_ok('CGI::Wiki::Simple::NoTemplates');
-  
+
   @methods = qw(setup teardown inside_link);
 };
 

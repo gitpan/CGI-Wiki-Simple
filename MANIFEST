@@ -3,7 +3,8 @@ LICENSE
 MANIFEST			This list of files
 Makefile.PL
 README
-bin/simple-user-setup-sqlite.pl
+bin/simple-user-setup.pl
+bin/dump-wiki.pl
 bin/wiki.cgi
 lib/CGI/Wiki/Simple.pm
 lib/CGI/Wiki/Simple/NoTemplates.pm
@@ -21,7 +22,9 @@ t/04-inside-link.t
 t/09-plugin.t
 t/10-plugin-static.t
 t/20-plugin-nodelist.t
+t/21-plugin-recent.t
 t/30-setup.t
+t/31-setup-store.t
 t/50-store-retrieve-page.t
 t/98-bin.t
 t/99-Pod.t
@@ -31,6 +34,7 @@ t/embedded-CGI-Wiki-Simple-Plugin-RecentChanges.t
 t/embedded-CGI-Wiki-Simple-Plugin-Static.t
 t/embedded-CGI-Wiki-Simple-Plugin.t
 t/embedded-CGI-Wiki-Simple.t
+t/embedded-CGI-Wiki-Simple-Setup.t
 templates/actions.templ
 templates/editform.templ
 templates/footer.templ

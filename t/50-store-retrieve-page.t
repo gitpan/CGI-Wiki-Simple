@@ -51,10 +51,10 @@ SKIP: {
         if $@;
       skip "Store $storename not configured for testing", 21
         unless $store;
-        
-      seek DATA, $dataoffset, 0 
+
+      seek DATA, $dataoffset, 0
         or die "Couldn't reset data position";
-  
+
       # We need to dispose of that store, but we'll steal the parameters :
       $dbargs{$_} = $store->$_ for (qw(dbname dbuser dbpass));
 
@@ -64,15 +64,15 @@ SKIP: {
       $dbargs{dbtype} = $1;
       $store->dbh->disconnect;
       undef $store;
-      
+
       # Now set up an empty database :
       CGI::Wiki::Simple::Setup::setup( %dbargs, clear => 1, nocontent => 1, silent => 1 );
-      
+
       # And recreate a store :
       $store = CGI::Wiki::Simple::Setup::get_store(%dbargs);
       my $nodes = $store->dbh->selectall_arrayref("select * from content");
       is_deeply($nodes,[],"Cleaned database");
-  
+
       # Set up the environment as to fake a real CGI environment :
       $cgi = CGI->new('');
       $cgi->path_info('/display/foo');

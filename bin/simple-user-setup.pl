@@ -5,8 +5,12 @@ use File::Spec;
 use CGI::Wiki::Simple::Setup;
 
 
-my ($dbname, $help, $clear, $force_update );
-GetOptions( "name=s"         => \$dbname,
+my ($dbname, $dbtype, $dbuser, $dbpass, $help, $clear, $force_update, $nodeball );
+GetOptions( "dbname=s"         => \$dbname,
+            "dbtype=s"         => \$dbtype,
+            "dbuser:s"         => \$dbuser,
+            "dbpass:s"         => \$dbpass,
+            "nodeball:s"       => \$nodeball,
             "help"           => \$help,
             "clear"          => \$clear,
             "force"          => \$force_update,
@@ -23,7 +27,19 @@ if ($help) {
     exit 0;
 }
 
-CGI::Wiki::Simple::Setup::setup( clear => $clear, force => $force_update, dbname => $dbname );
+my %dbargs = (
+  dbtype => $dbtype,
+  dbname => $dbname,
+  dbuser => $dbuser,
+  dbpass => $dbpass,
+);
+CGI::Wiki::Simple::Setup::setup( clear => $clear, force => $force_update, %dbargs );
+
+if ($nodeball) {
+  my $store = CGI::Wiki::Simple::Setup::get_store(%dbargs);
+  print "Loading nodeball '$nodeball'\n";
+  CGI::Wiki::Simple::Setup::load_nodeball( store => $store, force => $force_update, %dbargs, file => $nodeball );
+};
 
 =head1 NAME
 

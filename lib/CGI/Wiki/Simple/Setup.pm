@@ -7,9 +7,9 @@ use CGI::Wiki::Simple;
 use Carp qw(croak);
 use Digest::MD5 qw( md5_hex );
 
-use vars qw($VERSION @NODES);
+use vars qw($VERSION);
 
-$VERSION = 0.10;
+$VERSION = '0.11';
 
 =head1 NAME
 
@@ -26,6 +26,9 @@ This is a simple utility module that given a database sets up a complete wiki wi
   setup( dbtype => 'sqlite', dbname => "mywiki.db" );
   # This sets up a SQLite wiki within the file mywiki.db
 
+  setup( dbtype => 'mysql', dbname => "wiki", dbuser => "wiki", dbpass => "secret", file => 'nodeball.txt' );
+  # This sets up a MySQL wiki and loads the nodes from the file nodeball.txt
+
 =for example end
 
 =cut
@@ -35,6 +38,46 @@ my %stores = (
   mysql  => 'MySQL',
   pg     => 'Pg',
 );
+
+=head2 C<get_store %ARGS>
+
+C<get_store> creates a store from a hash of parameters. There
+are two mandatory parameters  :
+
+  dbtype => 'mysql'
+
+This is the type of the database. Recognized values are C<mysql>,
+C<sqlite> and C<pg>.
+
+  dbname => 'wiki'
+
+This is the name of the database.
+
+The remaining parameters are optional :
+
+  dbuser => 'wikiuser'
+
+The database user
+
+  dbpass => 'secret'
+
+The password for the database
+
+  setup => 1
+
+Create the database unless it exists already
+
+  clear => 1
+
+Wipe all nodes from the database before reinitializing
+it. Only valid if C<setup> is also true.
+
+  check => 1
+
+Check that a node called C<index> exists. This raises
+an error if the database exists but is empty.
+
+=cut
 
 sub get_store {
   my %args = @_;
@@ -48,7 +91,7 @@ sub get_store {
       if exists $args{$_};
   };
 
-  $dbtype = delete $args{dbtype};
+  $dbtype = $args{dbtype};
 
   croak "Unknown database type $dbtype"
     unless exists $stores{lc($dbtype)};
@@ -73,13 +116,23 @@ sub get_store {
   return $store;
 };
 
-sub setup_if_needed {
-  my %args = @_;
+=head2 C<setup %ARGS>
 
-  my $store;
-  eval { $store = get_store( %args, check => 1 ); };
-  setup(%args) if $@ or ! $store;
-};
+Creates a new database and initializes it. Takes the
+same parameters as C<get_store> and two additional
+optional parameters :
+
+  nocontent => 1
+
+Prevents loading the three default nodes from the module
+into the wiki.
+
+  force => 1
+
+Overwrites nodes with the loaded content even if they
+already exists.
+
+=cut
 
 sub setup {
   my %args = @_;
@@ -91,26 +144,117 @@ sub setup {
   unless ($args{nocontent}) {
     print "Loading content\n"
       unless $args{silent};
-
-    my $wiki = CGI::Wiki->new(
-               store  => $store,
-               search => undef );
-
-    unless (@NODES) {
-      @NODES = map {
-        /^Title:\s+(.*?)\r?\n(.*)/ms
-        ? { title => $1, content => $2 }
-        : ()
-      } do { undef $/; split /__NODE__/, <DATA> };
-    };
-
-    commit_content( %args, wiki => $wiki, nodes => [@NODES], );
-
-    undef $wiki;
+    load_nodeball( store => $store, )
   };
 
   $store->dbh->disconnect;
 };
+
+=head2 C<setup_if_needed %ARGS>
+
+Creates a new database and initializes it if no
+current database is found. Takes the same arguments
+as C<setup>
+
+=cut
+
+sub setup_if_needed {
+  my %args = @_;
+
+  my $store;
+  eval { $store = get_store( %args, check => 1 ); };
+  setup(%args) if $@ or ! $store;
+};
+
+=head2 C<load_nodeball>
+
+Loads a nodeball into the wiki. A nodeball is a set of nodes
+in a text file like this :
+
+  __NODE__
+  Title: TestNode
+
+  This is a test node. It
+  consists of content that will be formatted through the
+  wiki formatter.
+
+  __NODE__
+  Title: AnotherTestNode
+
+  You know it.
+
+The routine takes the following parameters additional
+to the usual database parameters :
+
+  fh => \*FILE
+
+Loads the nodeball from the filehandle FILE.
+
+  file => 'nodeball.txt'
+
+Loads the nodeball from the specified file.
+
+=cut
+
+sub load_nodeball {
+  my %args = @_;
+
+  if ($args{file}) {
+    open F, "<$args{file}"
+      or die "Couldn't read nodeball from '$args{file}' : $!\n";
+  } elsif ($args{fh}) {
+    *F = *{$args{fh}}
+  } else {
+    *F = *DATA;
+  };
+
+  my $store = $args{store} || get_store( %args );
+
+  unless ($args{nocontent}) {
+    my $wiki = CGI::Wiki->new(
+               store  => $store,
+               search => undef );
+
+    my $offset = tell F;
+    my @NODES = map {
+        /^Title:\s+(.*?)\r?\n(.*)/ms
+        ? { title => $1, content => $2 }
+        : ()
+      } do { undef $/; split /__NODE__/, <F> };
+    seek F, $offset, 0;
+
+    commit_content( %args, wiki => $wiki, nodes => \@NODES, );
+
+    undef $wiki;
+  };
+};
+
+=head2 C<commit_content %ARGS>
+
+Loads a set of nodes into the wiki database. Takes the following
+parameters :
+
+  wiki => $wiki
+
+An initialized CGI::Wiki.
+
+  force => 1
+
+Force overwriting existing nodes
+
+  silent => 1
+
+Do not print out normal messages. Warnings still get raised.
+
+  nodes => \@NODES
+
+A reference to an array of hash references. Each element should
+have the following structure :
+
+  { title => 'A node title', content => 'Some content' }
+
+
+=cut
 
 sub commit_content {
   my %args = @_;
@@ -168,8 +312,8 @@ plugin for this node :
 
 This node was loaded initially by the setup program among other nodes :
 
-     * [Wiki Howto]
-     * [CGI::Wiki::Simple]
+    * [Wiki Howto]
+    * [CGI::Wiki::Simple]
 __NODE__
 Title: Wiki Howto
 

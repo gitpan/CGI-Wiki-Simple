@@ -17,7 +17,7 @@ use Class::Delegation
 
 use vars qw( $VERSION %magic_node );
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 =head1 NAME
 
