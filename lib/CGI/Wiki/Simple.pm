@@ -17,7 +17,7 @@ use Class::Delegation
 
 use vars qw( $VERSION %magic_node );
 
-$VERSION = 0.06;
+$VERSION = 0.07;
 
 =head1 NAME
 
@@ -33,10 +33,13 @@ This is an instant wiki.
 
   use strict;
   use CGI::Wiki::Simple;
+  use CGI::Wiki::Simple::Setup; # currently only for SQLite
 
   # Change this to match your setup
   use CGI::Wiki::Store::SQLite;
-  my $store = CGI::Wiki::Store::SQLiteMySQL->new( dbname => "test" );
+  CGI::Wiki::Simple::Setup::setup_if_needed( dbname => "mywiki.db",
+                                             dbtype => 'sqlite' );
+  my $store = CGI::Wiki::Store::SQLite->new( dbname => "mywiki.db" );
 
   my $search = undef;
   my $wiki = CGI::Wiki::Simple->new( TMPL_PATH => "templates",
@@ -80,7 +83,8 @@ HTML::Template to prepare the content :
 
 C<new> passes most of the parameters on to the constructor of L<CGI::Wiki>.
 If HTML::Template is not available, you'll automagically get a non-templated
-wiki in the subclass CGI::Wiki::Simple::NoTemplates.
+wiki in the subclass CGI::Wiki::Simple::NoTemplates. Note that CGI::Application
+lists HTML::Template as one of its prerequisites but also works without it.
 
 =cut
 
@@ -98,6 +102,15 @@ wiki in the subclass CGI::Wiki::Simple::NoTemplates.
     $self;
   };
 };
+
+=item B<setup>
+
+The C<setup> method is called by the CGI::Application framework
+when the application should initialize itself and load all necessary
+parameters. The wiki decides here what to do and loads all needed values
+from the configuration or database respectively.
+
+=cut
 
 sub setup {
   my ($self,%args) = @_;
@@ -145,6 +158,12 @@ sub teardown {
   # Maybe later add the database disconnect here ...
 };
 
+=item B<wiki>
+
+This is the accessor method to the contained CGI::Wiki class.
+
+=cut
+
 sub wiki { $_[0]->param("wiki") };
 
 sub load_tmpl {
@@ -191,8 +210,6 @@ sub render_conflict {
 Renders either the display page or a page indicating that
 there was a version conflict.
 
-=back
-
 =cut
 
 sub render_commit {
@@ -216,7 +233,7 @@ sub render_commit {
   }
 };
 
-=head2 cgiapp_prerun
+=item cgiapp_prerun
 
 Loads some values for the subsequent rendering.
 
@@ -262,4 +279,27 @@ sub cgiapp_prerun {
   $self->prerun_mode($action);
 };
 
+=back
+
+=cut
+
 1;
+
+=head1 ACKNOWLEDGEMENTS
+
+Many thanks must go to Kate Plugh, for writing L<CGI::Wiki> and for testing and proofreading this module.
+
+=head1 AUTHOR
+
+Max Maischein (corion@cpan.org)
+
+=head1 COPYRIGHT
+
+     Copyright (C) 2003 Max Maischein.  All Rights Reserved.
+
+This code is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<CGI::Wiki>,L<CGI::Application>

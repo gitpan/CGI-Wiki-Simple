@@ -9,14 +9,17 @@ WriteMakefile(
     ABSTRACT_FROM => 'lib/CGI/Wiki/Simple.pm',
     PREREQ_PM     => { Test::More => 0,
                        Test::MockObject => 0,
+                       Test::Without::Module => 0.01,
+                       Test::HTML::Content => 0.03,
                        CGI::Wiki => 0.14,
+                       Class::Delegation => 1.06,
                        HTML::Entities => 0,
-                       CGI::Application => 0,
+                       CGI::Application => 3.0,
                        URI::Escape => 0,
                        },
 );
 
-use vars qw($have_test_inline);
+use vars qw($have_test_inline $have_class_delegation);
 BEGIN {
   eval { require Test::Inline;
          $have_test_inline = $Test::Inline::VERSION ge '0.15_001'; };

@@ -3,7 +3,7 @@ use CGI::Wiki::Simple::Plugin();
 use HTML::Entities;
 
 use vars qw($VERSION);
-$VERSION = 0.05;
+$VERSION = 0.07;
 
 =head1 NAME
 
@@ -41,7 +41,7 @@ sub retrieve_node {
 
   my $node = $args{name};
   my $re = $re{$node};
-  my %nodes = map { /$re/o ? ($1 => $_) : () } ($args{wiki}->list_all_nodes, keys %CGI::Wiki::Simple::magic_node);
+  my %nodes = map { /$re/ ? ($1 => $_) : () } ($args{wiki}->list_all_nodes, keys %CGI::Wiki::Simple::magic_node);
 
   return (
        "<ul>" .

@@ -1,55 +1,54 @@
 NAME
-    CGI::Wiki::Simple -
-
-SYNOPSIS
-      use CGI::Wiki::Simple;
-      blah blah blah
+    CGI::Wiki::Simple - A simple wiki application using CGI::Application.
 
 DESCRIPTION
-    Stub documentation for this module was created by ExtUtils::ModuleMaker.
-    It looks like the author of the extension was negligent enough to leave
-    the stub unedited.
+    This is an instant wiki.
 
-    Blah blah blah.
+SYNOPSIS
+      use strict;
+      use CGI::Wiki::Simple;
 
-USAGE
-BUGS
-SUPPORT
-AUTHOR
-            A. U. Thor
-            a.u.thor@a.galaxy.far.far.away
-            http://a.galaxy.far.far.away/modules
+      # Change this to match your setup
+      use CGI::Wiki::Store::SQLite;
+      my $store = CGI::Wiki::Store::SQLiteMySQL->new( dbname => "test" );
 
-COPYRIGHT
-    Copyright (c) 2003 A. U. Thor. All rights reserved. This program is free
-    software; you can redistribute it and/or modify it under the same terms
-    as Perl itself.
+      my $search = undef;
+      my $wiki = CGI::Wiki::Simple->new( TMPL_PATH => "templates",
+                                         PARAMS => {
+                                            store => $store,
+                                         })->run;
 
-    The full text of the license can be found in the LICENSE file included
-    with this module.
+EXAMPLE WITHOUT HTML::Template
+    It might be the case that you don't want to use HTML::Template, and in
+    fact, no templates at all. Then you can simple use the following example
+    as your wiki, which does not rely on HTML::Template to prepare the
+    content :
 
-SEE ALSO
-    perl(1).
+      use strict;
+      use CGI::Wiki::Simple::NoTemplates;
+      use CGI::Wiki::Store::MySQL; # Change this to match your setup
 
-PUBLIC METHODS
-    Each public function/method is described here. These are how you should
-    interact with this module.
+      my $store = CGI::Wiki::Store::MySQL->new( dbname => "test",
+                                                dbuser => "master",
+                                                dbpass => "master" );
 
-PRIVATE METHODS
-    Each private function/method is described here. These methods and
-    functions are considered private and are intended for internal use by
-    this module. They are not considered part of the public interface and
-    are described here for documentation purposes only.
+      my $search = undef;
+      my $wiki = CGI::Wiki::Simple::NoTemplates
+                 ->new( PARAMS => {
+                                    store => $store,
+                                  })->run;
 
-  sample_function
+METHODS
+    new "new" passes most of the parameters on to the constructor of the
+        CGI::Wiki manpage. If HTML::Template is not available, you'll
+        automagically get a non-templated wiki in the subclass
+        CGI::Wiki::Simple::NoTemplates.
 
-     Usage     : How to use this function/method
-     Purpose   : What it does
-     Returns   : What it returns
-     Argument  : What it wants to know
-     Throws    : Exceptions and other anomolies
-     Comments  : This is a sample subroutine header.
-               : It is polite to include more pod and fewer comments.
+    render_commit
+        Renders either the display page or a page indicating that there was
+        a version conflict.
 
-    See Also :
+  cgiapp_prerun
+
+    Loads some values for the subsequent rendering.
 

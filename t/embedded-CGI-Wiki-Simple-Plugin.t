@@ -57,6 +57,7 @@ eval q{
     local $^W = 0;
 
 #line 29 lib/CGI/Wiki/Simple/Plugin.pm
+
   package CGI::Wiki::Simple::Plugin::MyPlugin;
   use strict;
   use Carp qw(croak);
@@ -89,6 +90,7 @@ eval q{
     my ($module,@nodenames) = @_;
     CGI::Wiki::Simple::Plugin::register_nodes(module => $module, names => [@nodenames]);
   };
+  
 ;
 
   }

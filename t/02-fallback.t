@@ -1,9 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
 use Test::More tests => 3;
-
-use lib 'd:/Projekte/Test-Without-Module/lib';
-
 use Test::Without::Module qw( HTML::Template );
 
 BEGIN{ use_ok('CGI::Wiki::Simple') };

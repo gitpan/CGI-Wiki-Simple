@@ -38,6 +38,11 @@ SKIP: {
   skip "Need module CGI::Wiki::Simple to run this test", 1
     if $@;
 
+  # Check for module CGI::Wiki::Simple::Setup
+  eval { require CGI::Wiki::Simple::Setup };
+  skip "Need module CGI::Wiki::Simple::Setup to run this test", 1
+    if $@;
+
   # Check for module CGI::Wiki::Store::SQLite
   eval { require CGI::Wiki::Store::SQLite };
   skip "Need module CGI::Wiki::Store::SQLite to run this test", 1
@@ -60,10 +65,13 @@ eval q{
 
   use strict;
   use CGI::Wiki::Simple;
+  use CGI::Wiki::Simple::Setup; # currently only for SQLite
 
   # Change this to match your setup
   use CGI::Wiki::Store::SQLite;
-  my $store = CGI::Wiki::Store::SQLiteMySQL->new( dbname => "test" );
+  CGI::Wiki::Simple::Setup::setup_if_needed( dbname => "mywiki.db",
+                                             dbtype => 'sqlite' );
+  my $store = CGI::Wiki::Store::SQLite->new( dbname => "mywiki.db" );
 
   my $search = undef;
   my $wiki = CGI::Wiki::Simple->new( TMPL_PATH => "templates",
@@ -111,7 +119,7 @@ eval q{
   my $example = sub {
     local $^W = 0;
 
-#line 57 lib/CGI/Wiki/Simple.pm
+#line 60 lib/CGI/Wiki/Simple.pm
 
   use strict;
   use CGI::Wiki::Simple::NoTemplates;
@@ -132,7 +140,7 @@ eval q{
 
   }
 };
-is($@, '', "example from line 57");
+is($@, '', "example from line 60");
 
 };
 SKIP: {

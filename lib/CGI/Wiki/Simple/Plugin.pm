@@ -26,6 +26,7 @@ might convert all Plugin-subclasses to CGI::Wiki::Store subclasses or vice-versa
 =head1 SYNOPSIS
 
 =for example begin
+
   package CGI::Wiki::Simple::Plugin::MyPlugin;
   use strict;
   use Carp qw(croak);
@@ -58,6 +59,7 @@ might convert all Plugin-subclasses to CGI::Wiki::Store subclasses or vice-versa
     my ($module,@nodenames) = @_;
     CGI::Wiki::Simple::Plugin::register_nodes(module => $module, names => [@nodenames]);
   };
+  
 =for example end
 
 =cut

@@ -11,8 +11,8 @@ BEGIN {
 use CGI;
 use CGI::Carp qw( fatalsToBrowser );# Remove in production !
 use CGI::Wiki::Simple;
+use CGI::Wiki::Simple::Setup;
 use CGI::Wiki::Store::SQLite;
-#use CGI::Wiki::Store::MySQL;
 
 use CGI::Wiki::Simple::Plugin::Static( Welcome  => "There is an <a href='entrance'>entrance</a>. Speak <a href='Friend'>Friend</a> and <a href='Enter'>Enter</a>.",
                                          Enter    => "The <a href='entrance'>entrance</a> stays closed.",
@@ -25,10 +25,8 @@ use CGI::Wiki::Simple::Plugin::NodeList( name => 'AllCategories', re => '^Catego
 # Ugly Perl 5.4 hack to get all of this working with my ISP!
 Class::Delegation::INIT() if ($] < 5.006);
 
+CGI::Wiki::Simple::Setup::setup_if_needed( dbname => "$base/mywiki.db", dbtype => sqlite );
 my $store = CGI::Wiki::Store::SQLite->new( dbname => "$base/mywiki.db" );
-#my $store = CGI::Wiki::Store::MySQL->new( dbname => "test",
-#                                          dbuser => "master",
-#                                          dbpass => "master" );
 
 # This is a quick check whether we can see the database
 #$store->retrieve_node("index");

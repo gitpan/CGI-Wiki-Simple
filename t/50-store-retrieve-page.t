@@ -6,10 +6,7 @@ use Test::More tests => 22;
 use CGI;
 use CGI::Carp;
 use CGI::Wiki::TestConfig;
-use CGI::Wiki::Setup::SQLite;
-use CGI::Wiki::Store::SQLite;
 use DBI;
-use lib 'D:/Projekte/Test-Without-Module/lib';
 use Test::Without::Module qw( HTML::Template );
 use Test::HTML::Content;
 
@@ -30,6 +27,15 @@ SKIP: {
   BEGIN {
     eval { require HTTP::Response; };
     skip "Need HTTP::Response to test CGI interaction", 5
+      if $@;
+  };
+  BEGIN {
+    eval { 
+      require DBD::SQLite;
+      require CGI::Wiki::Setup::SQLite;
+      require CGI::Wiki::Store::SQLite;
+    };
+    skip "Need SQLite to test CGI interaction", 5
       if $@;
   };
 
@@ -83,14 +89,14 @@ SKIP: {
   # Test our default page setup
   link_ok($response->content,'http://search.cpan.org/search?mode=module&query=CGI::Wiki',"CGI::Wiki link");
   tag_ok($response->content,'form', { action => '/wiki/test' },"Searchbox");
-  
+
   # Now submit new content
   $cgi = CGI->new(*DATA);
   $cgi->path_info('/commit/foo');
 
   $wiki = CGI::Wiki::Simple->new( TMPL_PATH => 'templates',
     PARAMS => { store => $store, search => $search } );
-  isa_ok( $wiki, "CGI::Wiki::Simple" );  
+  isa_ok( $wiki, "CGI::Wiki::Simple" );
 
   $response = get_cgi_response();
   is($response->header('Status'),'302 Moved','Redirect after edit');
@@ -104,31 +110,31 @@ SKIP: {
     PARAMS => { store => $store, search => $search } );
   isa_ok( $wiki, "CGI::Wiki::Simple" );
   $response = get_cgi_response();
-  
+
   no_link($response->content,'/wiki/test/preview/foo',"No edit link (edit page)");
   link_ok($response->content,'/wiki/test/display/foo',"Display link (edit page)");
   like($response->content,qr'\bTesting setting a new value\b','Editbox content');
 
-  # Check that we receive the new content back   
+  # Check that we receive the new content back
   $cgi = CGI->new(*DATA);
   $cgi->path_info('/display/foo');
 
   $wiki = CGI::Wiki::Simple->new( TMPL_PATH => 'templates',
     PARAMS => { store => $store, search => $search } );
-  isa_ok( $wiki, "CGI::Wiki::Simple" );  
+  isa_ok( $wiki, "CGI::Wiki::Simple" );
 
   $response = get_cgi_response();
   is($response->header('Title'),'foo','Title');
   like( $response->content, qr'\bTesting setting a new value\b', "Filled wiki content");
 
   # Check for munging of HTML entities
-  
+
   # Now edit the page again
   # Check the page title
   # Check the page headers
   # Submit it with a wrong MD5
   # And check that we end up on the conflict page
-  
+
   # Add a test for sub render() :
   #   render with empty action list should return three no_link/no_tags
   #   render with combined action list should return the correct links/tags
